@@ -2,11 +2,13 @@ import {
   isEmpty,
   isNaN,
   compact,
+  difference,
   parseInt,
   isFunction,
   camelCase,
   kebabCase
 } from 'lodash'
+import { resolve } from 'path'
 import { userKeys, systemKeys } from './configKeys'
 
 export function bytesToSize (bytes) {
@@ -34,58 +36,85 @@ export function timeRemaining (totalLength, completedLength, downloadSpeed) {
   return Math.ceil(remainingLength / downloadSpeed)
 }
 
-export function timeFormat (seconds, prefix = '', suffix = '') {
+/**
+ * timeFormat
+ * @param {int} seconds
+ * @param {string} prefix
+ * @param {string} suffix
+ * @param {object} i18n
+ * i18n: {
+ *  gt1d: 'More than one day',
+ *  hour: 'h',
+ *  minute: 'm',
+ *  second: 's'
+ * }
+ */
+export function timeFormat (seconds, { prefix = '', suffix = '', i18n }) {
   let result = ''
   let hours = ''
   let minutes = ''
   let secs = seconds || 0
+  const i = {
+    gt1d: '> 1 day',
+    hour: 'h',
+    minute: 'm',
+    second: 's',
+    ...i18n
+  }
 
   if (secs <= 0) {
     return ''
   }
   if (secs > 86400) {
-    return `${prefix} 超过一天 ${suffix}`
+    return `${prefix} ${i.gt1d} ${suffix}`
   }
   if (secs > 3600) {
-    hours = `${Math.floor(secs / 3600)}时 `
+    hours = `${Math.floor(secs / 3600)}${i.hour} `
     secs %= 3600
   }
   if (secs > 60) {
-    minutes = `${Math.floor(secs / 60)}分 `
+    minutes = `${Math.floor(secs / 60)}${i.minute} `
     secs %= 60
   }
-  secs += '秒'
+  secs += i.second
   result = hours + minutes + secs
   return result ? `${prefix} ${result} ${suffix}` : result
 }
 
-export function getTaskName (task, defaultName = '') {
+export function ellipsis (str = '', maxLen = 64) {
+  const len = str.length
+  let result = str
+  if (len < maxLen) {
+    return result
+  }
+
+  if (maxLen > 0) {
+    result = `${result.substring(0, maxLen)}...`
+  }
+
+  return result
+}
+
+export function getTaskName (task, options = {}) {
+  const o = {
+    defaultName: '',
+    maxLen: 64, // -1: No limit length
+    ...options
+  }
+  const { defaultName, maxLen } = o
   let result = defaultName
   if (!task) {
     return result
   }
 
   const { files, bittorrent } = task
+  const total = files.length
 
   if (bittorrent && bittorrent.info && bittorrent.info.name) {
-    result = bittorrent.info.name
-    return result
-  }
-
-  if (files && files.length === 1) {
+    result = ellipsis(bittorrent.info.name, maxLen)
+  } else if (total === 1) {
     result = getFileName(files[0])
-  }
-
-  if (files.length > 1) {
-    let cnt = 0
-    for (let i = 0; i < files.length; i += 1) {
-      if (files[i].selected === 'true') {
-        cnt += 1
-      }
-    }
-    if (cnt > 1) {
-      result += ` (${cnt} 文件...)`
-    }
+    result = ellipsis(result, maxLen)
   }
 
   return result
@@ -112,29 +141,46 @@ export function getFileName (file) {
 
 export function getTaskFullPath (task) {
   const { dir, files, bittorrent } = task
-  let result = ''
+  let result = resolve(dir)
+
+  // Magnet link task
+  if (isMagnetTask(task)) {
+    return result
+  }
 
   if (bittorrent && bittorrent.info && bittorrent.info.name) {
-    result = `${dir}/${bittorrent.info.name}`
+    result = resolve(result, bittorrent.info.name)
     return result
   }
 
   const [file] = files
-  const { path } = file
-  result = path
+  const path = resolve(file.path)
+  let fileName = ''
 
-  if (!path && files && files.length === 1) {
-    result = `${dir}/${getFileName(file)}`
+  if (path) {
+    result = path
+  } else {
+    if (files && files.length === 1) {
+      fileName = getFileName(file)
+      if (fileName) {
+        result = resolve(result, fileName)
+      }
+    }
   }
 
   return result
 }
 
-export function getTaskUri (task) {
+export function isMagnetTask (task) {
+  const { bittorrent } = task
+  return bittorrent && !bittorrent.info
+}
+
+export function getTaskUri (task, btTracker = []) {
   const { files } = task
   let result = ''
   if (checkTaskIsBT(task)) {
-    result = '种子任务'
+    result = buildMagnetLink(task, btTracker)
     return result
   }
 
@@ -142,6 +188,27 @@ export function getTaskUri (task) {
     const { uris } = files[0]
     result = uris[0].uri
   }
+
+  return result
+}
+
+export function buildMagnetLink (task, btTracker = []) {
+  const { bittorrent, infoHash } = task
+  const { announceList, info } = bittorrent
+  const trackers = difference(announceList, btTracker)
+
+  let params = [
+    `magnet:?xt=urn:btih:${infoHash}`
+  ]
+  if (info && info.name) {
+    params.push(`dn=${encodeURI(info.name)}`)
+  }
+
+  trackers.forEach((tracker) => {
+    params.push(`tr=${encodeURI(tracker)}`)
+  })
+
+  const result = params.join('&')
 
   return result
 }
@@ -265,7 +332,6 @@ export function isAudioOrVideo (uri = '') {
   const result = suffixs.some((suffix) => {
     return uri.includes(suffix)
   })
-  console.warn('isAudioOrVideo===>', result)
   return result
 }
 
@@ -296,4 +362,11 @@ export function splitTaskLinks (links = '') {
     return decodeThunderLink(item)
   })
   return result
+}
+
+const resourceTag = ['http://', 'https://', 'ftp://', 'magnet:', 'thunder://']
+export function detectResource (content) {
+  return resourceTag.some((type) => {
+    return content.includes(type)
+  })
 }

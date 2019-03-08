@@ -9,8 +9,8 @@
     :before-close="handleClose"
     @closed="handleClosed"
   >
-    <div class="task-name" :title="taskName">
-      <span>{{ taskName }}</span>
+    <div class="task-name" :title="taskFullName">
+      <span>{{ taskFullName }}</span>
     </div>
     <mo-task-item-actions mode="ITEM" :task="task" />
     <div class="task-progress">
@@ -26,7 +26,17 @@
           <div v-if="task.status ==='active'">
             <span>{{ task.downloadSpeed | bytesToSize }}/s</span>
             <span>
-              {{ remaining | timeFormat('剩余') }}
+              {{
+                remaining | timeFormat({
+                  prefix: $t('task.remaining-prefix'),
+                  i18n: {
+                    'gt1d': $t('app.gt1d'),
+                    'hour': $t('app.hour'),
+                    'minute': $t('app.minute'),
+                    'second': $t('app.second')
+                  }
+                })
+              }}
             </span>
           </div>
         </el-col>
@@ -68,13 +78,20 @@
       }
     },
     computed: {
+      taskFullName: function () {
+        return getTaskName(this.task, {
+          defaultName: this.$t('task.get-task-name'),
+          maxLen: -1
+        })
+      },
       taskName: function () {
-        return getTaskName(this.task, '获取任务名中...')
+        return getTaskName(this.task, {
+          defaultName: this.$t('task.get-task-name'),
+          maxLen: 32
+        })
       },
       dialogTitle: function () {
-        const len = this.taskName.length
-        let title = len > 40 ? this.taskName.substr(0, 40) + '...' : this.taskName
-        return `${title} 详情`
+        return this.$t('task.task-info-dialog-title', { title: this.taskName })
       },
       remaining: function () {
         const { totalLength, completedLength, downloadSpeed } = this.task
@@ -86,7 +103,6 @@
       timeFormat
     },
     methods: {
-      getTaskName,
       handleClose (done) {
         this.$store.dispatch('task/hideTaskItemInfoDialog')
       },

@@ -4,7 +4,7 @@
   </ul>
   <div class="no-task" v-else>
     <div class="no-task-inner">
-      当前没有下载任务
+      {{ $t('task.no-task') }}
     </div>
   </div>
 </template>
@@ -12,12 +12,6 @@
 <script>
   import { mapState } from 'vuex'
   import TaskItem from './TaskItem'
-  import {
-    getTaskName,
-    bytesToSize,
-    timeRemaining,
-    timeFormat
-  } from '@shared/utils'
 
   export default {
     name: 'mo-task-list',
@@ -30,10 +24,6 @@
       })
     },
     methods: {
-      getTaskName,
-      bytesToSize,
-      timeRemaining,
-      timeFormat
     }
   }
 </script>

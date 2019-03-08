@@ -44,8 +44,9 @@
         const [{ gid }] = event
         api.fetchTaskItem({ gid })
           .then((task) => {
-            const message = `开始下载 ${getTaskName(task)}`
-            this.$message.info(message)
+            const taskName = getTaskName(task)
+            const message = this.$t('task.download-start-message', { taskName })
+            this.$msg.info(message)
           })
       },
       onDownloadPause: function (event) {
@@ -53,8 +54,9 @@
         const [{ gid }] = event
         api.fetchTaskItem({ gid })
           .then((task) => {
-            const message = `暂停下载 ${getTaskName(task)}`
-            this.$message.info(message)
+            const taskName = getTaskName(task)
+            const message = this.$t('task.download-pause-message', { taskName })
+            this.$msg.info(message)
           })
       },
       onDownloadStop: function (event) {
@@ -62,8 +64,9 @@
         const [{ gid }] = event
         api.fetchTaskItem({ gid })
           .then((task) => {
-            const message = `${getTaskName(task)} 下载中止`
-            this.$message.info(message)
+            const taskName = getTaskName(task)
+            const message = this.$t('task.download-stop-message', { taskName })
+            this.$msg.info(message)
           })
       },
       onDownloadError: function (event) {
@@ -71,8 +74,9 @@
         const [{ gid }] = event
         api.fetchTaskItem({ gid })
           .then((task) => {
-            const message = `${getTaskName(task)} 下载发生错误`
-            this.$message.error(message)
+            const taskName = getTaskName(task)
+            const message = this.$t('task.download-error-message', { taskName })
+            this.$msg.error(message)
           })
       },
       onDownloadComplete: function (event) {
@@ -104,15 +108,17 @@
         addToRecentTask(task)
         openDownloadDock(path)
 
-        const message = `${taskName} 下载完成`
-        this.$message.success(message)
+        const message = this.$t('task.download-complete-message', { taskName })
+        this.$msg.success(message)
 
         /* eslint-disable no-new */
-        const notify = new Notification('下载完成', {
+        const notify = new Notification(this.$t('task.download-complete-notify'), {
           body: taskName
         })
         notify.onclick = () => {
-          showItemInFolder(path)
+          showItemInFolder(path, {
+            errorMsg: this.$t('task.file-not-exist')
+          })
         }
       },
       showTaskErrorNotify: function (task) {
@@ -122,11 +128,11 @@
 
         const taskName = getTaskName(task)
 
-        const message = `${taskName} 下载失败`
-        this.$message.success(message)
+        const message = this.$t('task.download-fail-message', { taskName })
+        this.$msg.success(message)
 
         /* eslint-disable no-new */
-        new Notification('下载失败', {
+        new Notification(this.$t('task.download-fail-notify'), {
           body: taskName
         })
       },
@@ -166,6 +172,7 @@
     },
     created: function () {
       this.$store.dispatch('app/fetchEngineInfo')
+      this.$store.dispatch('app/fetchEngineOptions')
 
       this.startPolling()
 

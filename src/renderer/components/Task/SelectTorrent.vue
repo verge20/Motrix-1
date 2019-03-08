@@ -9,7 +9,7 @@
     :show-file-list="false">
     <i class="upload-inbox-icon"><mo-icon name="inbox" width="24" height="24" /></i>
     <div class="el-upload__text">
-      将种子拖到此处，或<em>点击选择</em>
+      {{ $t('task.select-torrent') }}
       <div class="torrent-name" v-if="name">{{ name }}</div>
     </div>
   </el-upload>
@@ -35,11 +35,18 @@
     computed: {
       ...mapState('preference', {
         config: state => state.config
+      }),
+      ...mapState('app', {
+        torrents: state => state.addTaskTorrents
       })
     },
-    methods: {
-      handleChange (file, fileList) {
-        console.log('file===>', file)
+    watch: {
+      torrents (fileList) {
+        const file = fileList[0]
+        if (fileList.length === 0) {
+          this.name = ''
+          return
+        }
         if (!file.raw) {
           return
         }
@@ -53,6 +60,12 @@
           this.name = file.name
           this.$emit('change', torrent, file, fileList)
         })
+      }
+    },
+    methods: {
+      handleChange (file, fileList) {
+        this.$store.dispatch('app/addTaskAddTorrents', { fileList })
+        console.log('file===>', file)
       }
     }
   }

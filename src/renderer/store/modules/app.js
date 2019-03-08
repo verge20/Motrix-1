@@ -12,7 +12,7 @@ const state = {
     version: '',
     enabledFeatures: []
   },
-  engineStatus: '',
+  engineOptions: {},
   interval: BASE_INTERVAL,
   stat: {
     downloadSpeed: 0,
@@ -21,22 +21,12 @@ const state = {
     numStopped: 0,
     numWaiting: 0
   },
-  currentPage: 'task',
   addTaskVisible: false,
   addTaskType: 'uri',
-  i18n: 'zh_CN'
-}
-
-const pageTitles = {
-  'task': '任务列表',
-  'preference': '偏好设置',
-  'about': '关于'
+  addTaskTorrents: []
 }
 
 const getters = {
-  currentPageTitle: (state, getters) => {
-    return pageTitles[state.currentPage] ? pageTitles[state.currentPage] : ''
-  }
 }
 
 const mutations = {
@@ -46,17 +36,20 @@ const mutations = {
   UPDATE_ENGINE_INFO (state, engineInfo) {
     state.engineInfo = { ...state.engineInfo, ...engineInfo }
   },
+  UPDATE_ENGINE_OPTIONS (state, engineOptions) {
+    state.engineOptions = { ...state.engineOptions, ...engineOptions }
+  },
   UPDATE_GLOBAL_STAT (state, stat) {
     state.stat = stat
-  },
-  CHANGE_CURRENT_PAGE (state, currentPage) {
-    state.currentPage = currentPage
   },
   CHANGE_ADD_TASK_VISIBLE (state, visible) {
     state.addTaskVisible = visible
   },
   CHANGE_ADD_TASK_TYPE (state, taskType) {
     state.addTaskType = taskType
+  },
+  CHANGE_ADD_TASK_TORRENTS (state, fileList) {
+    state.addTaskTorrents = [...fileList]
   },
   UPDATE_INTERVAL (state, millisecond) {
     let interval = millisecond
@@ -70,19 +63,16 @@ const mutations = {
       return
     }
     state.interval = interval
-    console.log('current interval===>', state.interval)
   },
   INCREASE_INTERVAL (state, millisecond) {
     if (state.interval < MAX_INTERVAL) {
       state.interval += millisecond
     }
-    console.log('current interval===>', state.interval)
   },
   DECREASE_INTERVAL (state, millisecond) {
     if (state.interval > MIN_INTERVAL) {
       state.interval -= millisecond
     }
-    console.log('current interval===>', state.interval)
   }
 }
 
@@ -99,6 +89,15 @@ const actions = {
         commit('UPDATE_ENGINE_INFO', data)
       })
   },
+  fetchEngineOptions ({ commit }) {
+    return new Promise((resolve) => {
+      api.getGlobalOption()
+        .then((data) => {
+          commit('UPDATE_ENGINE_OPTIONS', data)
+          resolve(data)
+        })
+    })
+  },
   fetchGlobalStat ({ commit, dispatch }) {
     api.getGlobalStat()
       .then((data) => {
@@ -107,8 +106,9 @@ const actions = {
           stat[key] = Number(data[key])
         })
 
-        if (stat.numActive > 0) {
-          const interval = BASE_INTERVAL - PER_INTERVAL * stat.numActive
+        const { numActive } = stat
+        if (numActive > 0) {
+          const interval = BASE_INTERVAL - PER_INTERVAL * numActive
           dispatch('updateInterval', interval)
         } else {
           // fix downloadSpeed when numActive = 0
@@ -117,22 +117,20 @@ const actions = {
         }
         commit('UPDATE_GLOBAL_STAT', stat)
 
-        // @4ET
-        if (!is.renderer()) {
-          return
-        }
-        if (stat.numActive > 0) {
-          api.startPowerSaveBlocker()
-        } else {
-          api.stopPowerSaveBlocker()
+        if (is.renderer()) {
+          dispatch('togglePowerSaveBlocker', numActive)
         }
       })
   },
+  togglePowerSaveBlocker (context, numActive) {
+    if (numActive > 0) {
+      api.startPowerSaveBlocker()
+    } else {
+      api.stopPowerSaveBlocker()
+    }
+  },
   increaseInterval ({ commit }, millisecond = 100) {
     commit('INCREASE_INTERVAL', millisecond)
-  },
-  changeCurrentPage ({ commit }, currentPage) {
-    commit('CHANGE_CURRENT_PAGE', currentPage)
   },
   showAddTaskDialog ({ commit }, taskType) {
     commit('CHANGE_ADD_TASK_TYPE', taskType)
@@ -140,9 +138,13 @@ const actions = {
   },
   hideAddTaskDialog ({ commit }) {
     commit('CHANGE_ADD_TASK_VISIBLE', false)
+    commit('CHANGE_ADD_TASK_TORRENTS', [])
   },
   changeAddTaskType ({ commit }, taskType) {
     commit('CHANGE_ADD_TASK_TYPE', taskType)
+  },
+  addTaskAddTorrents ({ commit }, { fileList }) {
+    commit('CHANGE_ADD_TASK_TORRENTS', fileList)
   },
   updateInterval ({ commit }, millisecond) {
     commit('UPDATE_INTERVAL', millisecond)

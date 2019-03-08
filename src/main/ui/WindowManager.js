@@ -1,5 +1,7 @@
+import { join } from 'path'
 import { EventEmitter } from 'events'
 import { app, shell, BrowserWindow } from 'electron'
+import is from 'electron-is'
 import pageConfig from '../configs/page'
 
 const defaultBrowserOptions = {
@@ -13,7 +15,7 @@ const defaultBrowserOptions = {
 export default class WindowManager extends EventEmitter {
   constructor (options = {}) {
     super()
-    this.options = options
+    this.userConfig = options.userConfig || {}
 
     this.windows = {}
 
@@ -28,8 +30,25 @@ export default class WindowManager extends EventEmitter {
     this.willQuit = flag
   }
 
+  getPageOptions (page) {
+    const result = pageConfig[page] || {}
+    const hideAppMenu = this.userConfig['hide-app-menu']
+    if (hideAppMenu) {
+      result.attrs.frame = false
+    }
+
+    // fix AppImage Dock Icon Missing
+    // https://github.com/AppImage/AppImageKit/wiki/Bundling-Electron-apps
+    if (is.linux()) {
+      result.attrs.icon = join(__static, './512x512.png')
+    }
+
+    return result
+  }
+
   openWindow (page) {
-    const options = pageConfig[page] || {}
+    const options = this.getPageOptions(page)
+
     let window = this.windows[page] || null
     if (window) {
       window.restore()

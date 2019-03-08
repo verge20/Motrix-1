@@ -4,30 +4,30 @@
     <ul>
       <li
         @click="() => nav('active')"
-        v-bind:class="[ current === 'active' ? 'active' : '' ]"
+        :class="[ current === 'active' ? 'active' : '' ]"
       >
         <i class="subnav-icon">
           <mo-icon name="task-start" width="20" height="20" />
         </i>
-        <span>下载中</span>
+        <span>{{ $t('task.active') }}</span>
       </li>
       <li
         @click="() => nav('waiting')"
-        v-bind:class="[ current === 'waiting' ? 'active' : '' ]"
+        :class="[ current === 'waiting' ? 'active' : '' ]"
       >
         <i class="subnav-icon">
           <mo-icon name="task-pause" width="20" height="20" />
         </i>
-        <span>已暂停</span>
+        <span>{{ $t('task.waiting') }}</span>
       </li>
       <li
         @click="() => nav('stopped')"
-        v-bind:class="[ current === 'stopped' ? 'active' : '' ]"
+        :class="[ current === 'stopped' ? 'active' : '' ]"
       >
         <i class="subnav-icon">
           <mo-icon name="task-stop" width="20" height="20" />
         </i>
-        <span>已完成</span>
+        <span>{{ $t('task.stopped') }}</span>
       </li>
     </ul>
   </nav>
@@ -48,12 +48,11 @@
     },
     computed: {
       title: function () {
-        return '任务列表'
+        return this.$t('subnav.task-list')
       }
     },
     methods: {
       nav: function (status = 'active') {
-        console.log('nav status===>', status)
         this.$router.push({
           path: `/task/${status}`
         })

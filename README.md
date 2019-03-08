@@ -4,59 +4,88 @@
   <img src="https://cdn.nlark.com/yuque/0/2018/png/129147/1543735425232-a5d2c99f-d788-43e4-9781-558ff6d21027.png" width="256" alt="App Icon" />
 </a>
 
-## 一款全能的下载工具
-[![Build Status](https://travis-ci.org/agalwood/Motrix.svg?branch=master)](https://travis-ci.org/agalwood/Motrix) [![Build status](https://ci.appveyor.com/api/projects/status/l11d5h05xwwcvoux/branch/master?svg=true)](https://ci.appveyor.com/project/agalwood/motrix/branch/master)
+## A full-featured download manager.
+[![Build Status](https://travis-ci.org/agalwood/Motrix.svg?branch=master)](https://travis-ci.org/agalwood/Motrix) [![Build status](https://ci.appveyor.com/api/projects/status/l11d5h05xwwcvoux/branch/master?svg=true)](https://ci.appveyor.com/project/agalwood/motrix/branch/master) ![Total Downloads](https://img.shields.io/github/downloads/agalwood/Motrix/total.svg) ![Support Platforms](https://camo.githubusercontent.com/a50c47295f350646d08f2e1ccd797ceca3840e52/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f706c6174666f726d2d6d61634f5325323025374325323057696e646f77732532302537432532304c696e75782d6c69676874677265792e737667)
 
+English | [简体中文](./README-CN.md)
 
-支持下载 HTTP、FTP、BT、磁力链、百度网盘等资源
+Motrix is a full-featured download manager that supports downloading HTTP, FTP, BitTorrent, Magnet, Baidu Net Disk, etc.
 
-<span style="font-size: 30px">我</span>是个兴趣使然的桌面应用开发者🤓，出于兴趣爱好，利用搬砖之余开发了 [MO 1.0](https://moapp.me) 版本，做出来有大半年了，没做过什么推广，所以大家可能都没怎么听过这个应用吧～👻～
+Motrix has a clean and easy to use interface. I hope you will like it 👻.
 
-本着自己用得舒(折)服(腾)😌的想法，🤠撸出了个全新的版本，并更名为 Motrix。新版本不仅优化了性能，还重新设计了图形操作界面，操作更简便！
+✈️ [Official Website](https://motrix.app) | 📖 [Manual](http://motrix.app/support/issues) (zh-CN)
 
-[官网](https://motrix.app)提供了已经编译好的应用安装包（[去官网下载](https://motrix.app/release)），当然你也可以自己克隆代码进行编译打包。
+## 💽 Installation
+Download from [GitHub Releases](https://github.com/agalwood/Motrix/releases) and install it.
 
-## 🛠 技术栈
-- [Electron](https://electronjs.org/)
-- [Vue](https://vuejs.org/) + [VueX](https://vuex.vuejs.org/) + [Element](https://element.eleme.io)
-- [Aria2](https://aria2.github.io/) (注：macOS 和 Linux 版本使用的是 64 位的 aria2c，Windows 版使用的 32 位的）
+Update: macOS user support `brew cask` installation, thanks to [PR](https://github.com/Homebrew/homebrew-cask/pull/59494) of [Mitscherlich](https://github.com/Mitscherlich).
 
-## 📦 自行编译
+```bash
+brew update && brew cask install motrix
+```
 
-### 克隆代码
+## ✨ Features
+- 🕹 Simple and clear user interface
+- 🦄 Supports BitTorrent & Magnet
+- 💾 Supports downloading Baidu Net Disk
+- 🎛 Up to 10 concurrent download tasks
+- 🚀 Supports 64 threads in a single task
+- 🕶 Mock User-Agent
+- 🔔 Download completed Notification
+- 💻 Ready for Touch Bar (Mac only)
+- 🗑 Delete related files when removing tasks (optional)
+- 🌍 I18n, [View supported languages](#-internationalization).
+- 🎏 ...
+
+## 🖥 User Interface
+![motrix-screenshot-task-en.png](https://cdn.nlark.com/yuque/0/2019/png/129147/1550151166169-94b4bfb0-746e-42b8-aad7-0b6890f89abb.png)
+
+## ⌨️ Development
+
+### Clone Code
 ```bash
 git clone git@github.com:agalwood/Motrix.git
 ```
 
-### 安装依赖
+### Install Dependencies
 ```bash
 cd Motrix
 npm install
 ```
-天朝大陆用户建议使用淘宝的npm源
-```bash
-npm config set registry 'https://registry.npm.taobao.org'
-export ELECTRON_MIRROR='https://npm.taobao.org/mirrors/electron/'
-export SASS_BINARY_SITE='https://npm.taobao.org/mirrors/node-sass'
-```
-如果喜欢 [Yarn](https://yarnpkg.com/)，也可以使用 `yarn` 安装依赖
+If you like [Yarn](https://yarnpkg.com/), you can also use `yarn` to install dependencies.
 
-### 开发模式
+### Dev Mode
 ```bash
 npm run dev
 ```
 
-### 编译打包
+### Build Release
 ```bash
 npm run build
 ```
-完成之后可以在项目的 release 目录看到编译打包好的应用文件
+After building, the application will be found in the project's `release` directory.
+
+## 🛠 Technology Stack
+- [Electron](https://electronjs.org/)
+- [Vue](https://vuejs.org/) + [VueX](https://vuex.vuejs.org/) + [Element](https://element.eleme.io)
+- [Aria2](https://aria2.github.io/) (Note: macOS and Linux versions use 64-bit aria2c, Windows version uses 32-bit)
 
 ## ☑️ TODO
-开发计划请移步 [Trello](https://trello.com/b/qNUzA0bv/motrix)
+Development Roadmap see: [Trello](https://trello.com/b/qNUzA0bv/motrix)
 
-## 🤝 参与共建 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com)
-如果你有兴趣参与共同开发，欢迎 FORK 和 PR。
+## 🤝 Contribute [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com)
+If you are interested in participating in joint development, PR and Forks are welcome!
 
-## 📜 开源许可
-基于 [MIT license](https://opensource.org/licenses/MIT) 许可进行开源。
+## 🌍 Internationalization
+Translations into versions for other languages are welcome 🧐! Please read the [translation guide](./CONTRIBUTING.md#-translation-guide) before starting translations.
+
+| Key   | Name            | Status       |
+|-------|:----------------|:-------------|
+| en-US | English         | ✔️           |
+| fr    | Français        | Next Release [@gpatarin](https://github.com/gpatarin) |
+| tr    | Türkçe          | Next Release [@abdullah](https://github.com/abdullah) |
+| zh-CN | 简体中文         | ✔️           |
+| zh-TW | 繁體中文         | Next Release [@Yukaii](https://github.com/Yukaii) |
+
+## 📜 License
+[MIT](https://opensource.org/licenses/MIT) Copyright (c) 2018-present Dr_rOot

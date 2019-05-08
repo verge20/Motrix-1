@@ -154,7 +154,7 @@ export function getTaskFullPath (task) {
   }
 
   const [file] = files
-  const path = resolve(file.path)
+  const path = file.path ? resolve(file.path) : ''
   let fileName = ''
 
   if (path) {
@@ -322,7 +322,21 @@ export function compactUndefined (arr = []) {
 }
 
 export function splitTextRows (text = '') {
-  return text.replace(/\r\n/g, '\n').split('\n') || []
+  let result = text.replace(/(?:\r\n|\r|\n)/g, '\n').split('\n') || []
+  result = result.map((row) => row.trim())
+  return result
+}
+
+export function convertCommaToLine (text = '') {
+  let arr = text.split(',')
+  arr = arr.map((row) => row.trim())
+  const result = arr.join('\n')
+  return result
+}
+
+export function convertLineToComma (text = '') {
+  const result = text.trim().replace(/(?:\r\n|\r|\n)/g, ',')
+  return result
 }
 
 const audioSuffix = ['.aac', '.mp3', '.ogg', '.ape', '.flac', '.m4a', '.wav', '.wma', '.flav']
@@ -350,9 +364,10 @@ export function decodeThunderLink (url = '') {
     return url
   }
 
-  let result = url.split('thunder://')[1]
+  let result = url.trim()
+  result = result.split('thunder://')[1]
   result = Buffer.from(result, 'base64').toString('utf8')
-  result = result.substring(0, result.length - 2)
+  result = result.substring(2, result.length - 2)
   return result
 }
 
@@ -369,4 +384,46 @@ export function detectResource (content) {
   return resourceTag.some((type) => {
     return content.includes(type)
   })
+}
+
+export function buildFileList (rawFile) {
+  rawFile.uid = Date.now()
+  let file = {
+    status: 'ready',
+    name: rawFile.name,
+    size: rawFile.size,
+    percentage: 0,
+    uid: rawFile.uid,
+    raw: rawFile
+  }
+  const fileList = [file]
+  return fileList
+}
+
+const supportRtlLocales = [
+  /* 'العربية', Arabic */
+  'ar',
+  /* 'فارسی', Persian */
+  'fa',
+  /* 'עברית', Hebrew */
+  'he',
+  /* 'Kurdî / كوردی', Kurdish */
+  'ku',
+  /* 'پنجابی', Western Punjabi */
+  'pa',
+  /* 'پښتو', Pashto, */
+  'ps',
+  /* 'سنڌي', Sindhi */
+  'sd',
+  /* 'اردو', Urdu */
+  'ur',
+  /* 'ייִדיש', Yiddish */
+  'yi'
+]
+export function isRTL (locale = 'en-US') {
+  return supportRtlLocales.includes(locale)
+}
+
+export function getLangDirection (locale = 'en-US') {
+  return isRTL(locale) ? 'rtl' : 'ltr'
 }

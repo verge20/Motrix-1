@@ -1,9 +1,9 @@
 <template>
   <el-container class="content panel" direction="horizontal">
     <el-aside width="200px" class="subnav">
-      <router-view name="subnav"></router-view>
+      <router-view name="subnav" />
     </el-aside>
-    <router-view name="form"></router-view>
+    <router-view name="form" />
   </el-container>
 </template>
 
@@ -28,6 +28,19 @@
       font-weight: $--font-weight-secondary;
       color: $--color-text-regular;
     }
+    .el-form-item {
+      a {
+        color: $--color-text-regular;
+        text-decoration: none;
+        &:hover {
+          color: $--color-text-primary;
+          text-decoration: underline;
+        }
+        &:active {
+          color: $--color-text-primary;
+        }
+      }
+    }
     .el-form-item.el-form-item--mini {
       margin-bottom: 24px;
     }
@@ -39,22 +52,14 @@
       &:last-of-type {
         margin-bottom: 0;
       }
-      a {
-        color: $--color-text-regular;
-        text-decoration: none;
-        &:hover {
-          color: $--color-text-primary;
-          text-decoration: underline;
-        }
-      }
     }
   }
   .form-actions {
-    position: absolute;
+    position: fixed;
     bottom: 0;
-    left: 0;
-    width: 100%;
+    left: auto;
+    z-index: 10;
     box-sizing: border-box;
-    padding: 24px 36px;
+    padding: 24px 36px 24px 0;
   }
 </style>

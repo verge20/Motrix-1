@@ -1,11 +1,11 @@
 <template>
   <el-row class="copyright">
-    <el-col :span="8" class="copyright-left">
+    <el-col :span="6" class="copyright-left">
       <a target="_blank" href="https://motrix.app/" rel="noopener noreferrer">
         &copy;2018 Motrix
       </a>
     </el-col>
-    <el-col :span="16" class="copyright-right">
+    <el-col :span="18" class="copyright-right">
       <a target="_blank" href="https://motrix.app/about" rel="noopener noreferrer">
         {{ $t('about.about') }}
       </a>
@@ -30,15 +30,12 @@
     width: 100%;
     font-size: $--font-size-small;
     a {
-      color: $--color-text-regular;
+      color: $--app-copyright-color;
       text-decoration: none;
     }
   }
   .copyright-left {
     text-align: left;
-    a {
-      color: $--color-text-regular;
-    }
   }
 
   .copyright-right {

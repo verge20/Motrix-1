@@ -1,20 +1,44 @@
+import appLocaleDe from '@shared/locales/de'
 import appLocaleEnUS from '@shared/locales/en-US'
-import appLocaleFrFR from '@shared/locales/fr'
+import appLocaleFa from '@shared/locales/fa'
+import appLocaleFr from '@shared/locales/fr'
+import appLocaleJa from '@shared/locales/ja'
+import appLocaleKo from '@shared/locales/ko'
 import appLocalePtBr from '@shared/locales/pt-BR'
-import appLocaleTrTR from '@shared/locales/tr'
+import appLocaleTr from '@shared/locales/tr'
 import appLocaleZhCN from '@shared/locales/zh-CN'
 import appLocaleZhTW from '@shared/locales/zh-TW'
 
 // Please keep the locale key in alphabetical order.
 const resources = {
+  'de': {
+    translation: {
+      ...appLocaleDe
+    }
+  },
   'en-US': {
     translation: {
       ...appLocaleEnUS
     }
   },
+  'fa': {
+    translation: {
+      ...appLocaleFa
+    }
+  },
   'fr': {
     translation: {
-      ...appLocaleFrFR
+      ...appLocaleFr
+    }
+  },
+  'ja': {
+    translation: {
+      ...appLocaleJa
+    }
+  },
+  'ko': {
+    translation: {
+      ...appLocaleKo
     }
   },
   'pt-BR': {
@@ -24,7 +48,7 @@ const resources = {
   },
   'tr': {
     translation: {
-      ...appLocaleTrTR
+      ...appLocaleTr
     }
   },
   'zh-CN': {

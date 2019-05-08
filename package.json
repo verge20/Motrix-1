@@ -1,6 +1,6 @@
 {
   "name": "Motrix",
-  "version": "1.1.3",
+  "version": "1.3.8",
   "description": "A full-featured download manager",
   "homepage": "https://motrix.app",
   "author": {
@@ -32,12 +32,35 @@
   "build": {
     "productName": "Motrix",
     "appId": "net.agalwood.Motrix",
+    "fileAssociations": [
+      {
+        "ext": "torrent",
+        "mimeType": "application/x-bittorrent",
+        "name": "Torrent",
+        "role": "Viewer"
+      }
+    ],
     "asar": true,
     "directories": {
       "output": "release"
     },
     "files": [
       "dist/electron/**/*"
+    ],
+    "protocols": [
+      {
+        "name": "Motrix Protocol",
+        "schemes": [
+          "mo",
+          "motrix"
+        ]
+      },
+      {
+        "name": "Magnet Protocol",
+        "schemes": [
+          "magnet"
+        ]
+      }
     ],
     "dmg": {
       "window": {
@@ -75,16 +98,7 @@
       "binaries": [
         "./release/mac/Motrix.app/Contents/Resources/engine/aria2c"
       ],
-      "category": "public.app-category.utilities",
-      "protocols": [
-        {
-          "name": "Motrix Protocol",
-          "schemes": [
-            "mo",
-            "motrix"
-          ]
-        }
-      ]
+      "category": "public.app-category.utilities"
     },
     "win": {
       "target": [
@@ -95,8 +109,20 @@
             "ia32"
           ]
         },
-        "zip",
-        "portable"
+        {
+          "target": "zip",
+          "arch": [
+            "x64",
+            "ia32"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64",
+            "ia32"
+          ]
+        }
       ],
       "extraResources": {
         "from": "./extra/win32/",
@@ -111,6 +137,7 @@
       "allowToChangeInstallationDirectory": true
     },
     "linux": {
+      "category": "Network",
       "target": [
         "deb",
         "snap",
@@ -138,33 +165,34 @@
     "@panter/vue-i18next": "^0.15.0",
     "aria2": "^4.0.3",
     "axios": "^0.18.0",
-    "clipboard-polyfill": "^2.7.0",
-    "electron-debug": "^2.1.0",
+    "blob-util": "^2.0.2",
+    "clipboard-polyfill": "^2.8.0",
+    "electron-debug": "^2.2.0",
     "electron-is": "^3.0.0",
-    "electron-log": "^2.2.17",
-    "electron-updater": "^4.0.7",
-    "element-ui": "^2.5.4",
+    "electron-log": "^3.0.5",
+    "electron-updater": "^4.0.9",
+    "element-ui": "^2.7.2",
     "forever-monitor": "^1.7.1",
-    "i18next": "^15.0.4",
+    "i18next": "^15.0.9",
     "lodash": "^4.17.11",
     "normalize.css": "^8.0.1",
     "parse-torrent": "^6.1.2",
     "svg-innerhtml": "^1.1.0",
-    "vue": "^2.6.7",
+    "vue": "^2.6.10",
     "vue-electron": "^1.0.6",
-    "vue-router": "^3.0.2",
+    "vue-router": "^3.0.6",
     "vuex": "^3.1.0",
     "vuex-router-sync": "^5.0.0"
   },
   "devDependencies": {
-    "@vue/cli-plugin-babel": "^3.4.1",
-    "@vue/cli-plugin-eslint": "^3.4.1",
-    "@vue/cli-service": "^3.4.1",
+    "@vue/cli-plugin-babel": "^3.6.0",
+    "@vue/cli-plugin-eslint": "^3.6.0",
+    "@vue/cli-service": "^3.6.0",
     "@vue/eslint-config-standard": "^4.0.0",
-    "ajv": "^6.9.2",
+    "ajv": "^6.10.0",
     "babel-core": "^6.26.3",
     "babel-eslint": "^10.0.1",
-    "babel-loader": "^7.1.4",
+    "babel-loader": "^7.1.5",
     "babel-plugin-component": "^1.1.1",
     "babel-plugin-transform-runtime": "^6.23.0",
     "babel-preset-env": "^1.7.0",
@@ -173,29 +201,30 @@
     "babili-webpack-plugin": "^0.1.2",
     "cfonts": "^2.4.2",
     "chalk": "^2.4.2",
-    "copy-webpack-plugin": "^5.0.0",
+    "copy-webpack-plugin": "^5.0.3",
     "cross-env": "^5.1.6",
-    "css-loader": "^2.1.0",
-    "del": "^3.0.0",
+    "css-loader": "^2.1.1",
+    "del": "^4.1.0",
     "devtron": "^1.4.0",
-    "electron": "^4.0.5",
-    "electron-builder": "^20.38.5",
+    "electron": "^4.1.5",
+    "electron-builder": "^20.39.0",
     "electron-devtools-installer": "^2.2.4",
     "electron-notarize": "^0.0.5",
     "electron-osx-sign": "^0.4.11",
     "electron-store": "^2.0.0",
-    "eslint": "^5.14.1",
+    "eslint": "^5.16.0",
     "eslint-config-standard": "^12.0.0",
     "eslint-friendly-formatter": "^4.0.1",
     "eslint-loader": "^2.1.2",
-    "eslint-plugin-import": "^2.16.0",
+    "eslint-plugin-html": "^4.0.6",
+    "eslint-plugin-import": "^2.17.2",
     "eslint-plugin-node": "^8.0.1",
-    "eslint-plugin-promise": "^4.0.1",
+    "eslint-plugin-promise": "^4.1.1",
     "eslint-plugin-standard": "^4.0.0",
     "eslint-plugin-vue": "^5.2.2",
     "file-loader": "^3.0.1",
     "html-webpack-plugin": "^3.2.0",
-    "mini-css-extract-plugin": "0.5.0",
+    "mini-css-extract-plugin": "0.6.0",
     "multispinner": "^0.2.1",
     "node-loader": "^0.6.0",
     "node-sass": "^4.10.0",
@@ -203,14 +232,13 @@
     "sass-loader": "^7.1.0",
     "style-loader": "^0.23.1",
     "url-loader": "^1.1.2",
-    "eslint-plugin-html": "^4.0.6",
     "vue-html-loader": "^1.2.4",
-    "vue-loader": "^15.6.4",
+    "vue-loader": "^15.7.0",
     "vue-style-loader": "^4.1.2",
-    "vue-template-compiler": "^2.6.7",
-    "webpack": "^4.29.5",
-    "webpack-cli": "^3.2.3",
-    "webpack-dev-server": "^3.2.0",
+    "vue-template-compiler": "^2.6.10",
+    "webpack": "^4.30.0",
+    "webpack-cli": "^3.3.1",
+    "webpack-dev-server": "^3.3.1",
     "webpack-hot-middleware": "^2.24.3",
     "webpack-merge": "^4.2.1"
   }

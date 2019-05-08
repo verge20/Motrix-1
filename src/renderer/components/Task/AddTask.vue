@@ -5,6 +5,7 @@
     :visible.sync="visible"
     :before-close="handleClose"
     @open="handleOpen"
+    @opened="handleOpened"
     @closed="handleClosed">
     <el-form
       ref="taskForm"
@@ -19,8 +20,9 @@
               type="textarea"
               :autosize="{ minRows: 3, maxRows: 5 }"
               auto-complete="off"
-              :placeholder="$t('task.uri-task-tip')"
+              :placeholder="$t('task.uri-task-tips')"
               @change="handleUriChange"
+              @paste.native="handleUriPaste"
               v-model="form.uris">
             </el-input>
           </el-form-item>
@@ -40,7 +42,7 @@
       <el-row :gutter="12">
         <el-col :span="15">
           <el-form-item :label="`${$t('task.task-out')}: `" :label-width="formLabelWidth">
-            <el-input :placeholder="$t('task.task-out-tip')" v-model="form.out">
+            <el-input :placeholder="$t('task.task-out-tips')" v-model="form.out">
             </el-input>
           </el-form-item>
         </el-col>
@@ -123,9 +125,10 @@
   } from '@shared/utils'
 
   const initialForm = (state) => {
+    const { addTaskUrl } = state.app
     const { dir, split, newTaskShowDownloading } = state.preference.config
     const result = {
-      uris: '',
+      uris: addTaskUrl,
       torrent: '',
       out: '',
       userAgent: '',
@@ -211,7 +214,12 @@
         if (!hasResource) {
           return
         }
-        this.form.uris = content
+        if (isEmpty(this.form.uris)) {
+          this.form.uris = content
+        }
+      },
+      handleOpened () {
+        this.detectThunderResource(this.form.uris)
       },
       handleClose (done) {
         this.$store.dispatch('app/hideAddTaskDialog')
@@ -222,17 +230,23 @@
       handleTabClick (tab, event) {
         this.$store.dispatch('app/changeAddTaskType', tab.name)
       },
-      handleUriChange () {
-        // el-input does not support @paste event ?
-        // https://github.com/ElemeFE/element/blob/master/packages/input/src/input.vue
-        const { uris } = this.form
+      handleUriPaste () {
+        setImmediate(() => {
+          const uris = this.$refs.uri.value
+          this.detectThunderResource(uris)
+        })
+      },
+      detectThunderResource (uris = '') {
         if (uris.includes('thunder://')) {
           this.$msg({
             type: 'warning',
-            message: this.$t('task.thunder-link-tip'),
+            message: this.$t('task.thunder-link-tips'),
             duration: 6000
           })
         }
+      },
+      handleUriChange () {
+        console.log('handleUriChange===>', this.form.uris)
       },
       handleTorrentChange (torrent, file, fileList) {
         // TODO 种子选择部分文件下载
@@ -391,14 +405,17 @@
 </script>
 
 <style lang="scss">
-  .add-task-dialog {
+  .el-dialog.add-task-dialog {
     max-width: 632px;
+    .el-tabs__header {
+      user-select: none;
+    }
     .el-input-number.el-input-number--mini {
       width: 100%;
     }
     .el-dialog__footer {
       padding-top: 20px;
-      background: #f5f5f5;
+      background-color: $--add-task-dialog-footer-background;
       border-radius: 0 0 5px 5px;
     }
     .dialog-footer {

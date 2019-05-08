@@ -13,17 +13,43 @@ export default class ProtocolManager extends EventEmitter {
   }
 
   init () {
-    // package.json:build.mac.protocols[].schemes[]
+    // package.json:build.protocols[].schemes[]
     if (!app.isDefaultProtocolClient('mo')) {
       app.setAsDefaultProtocolClient('mo')
     }
     if (!app.isDefaultProtocolClient('motrix')) {
       app.setAsDefaultProtocolClient('motrix')
     }
+    if (!app.isDefaultProtocolClient('magnet')) {
+      app.setAsDefaultProtocolClient('magnet')
+    }
   }
 
   handle (url) {
     logger.info(`[Motrix] protocol url: ${url}`)
+
+    if (url.toLowerCase().startsWith('magnet:')) {
+      return this.handleMagnetProtocol(url)
+    }
+
+    if (
+      url.toLowerCase().startsWith('mo:') ||
+      url.toLowerCase().startsWith('motrix:')
+    ) {
+      return this.handleMoProtocol(url)
+    }
+  }
+
+  handleMagnetProtocol (url) {
+    if (!url) {
+      return
+    }
+    logger.error(`[Motrix] handleMagnetProtocol url: ${url}`)
+
+    global.application.sendCommandToAll('application:new-task', 'uri', url)
+  }
+
+  handleMoProtocol (url) {
     const parsed = new URL(url)
     const { host } = parsed
     logger.info('[Motrix] protocol parsed:', parsed, host)
@@ -37,6 +63,6 @@ export default class ProtocolManager extends EventEmitter {
     // 如果按顺序传递，那 url 的 query string 就要求有序的了
     // const query = queryString.parse(parsed.query)
     const args = []
-    global.application.sendCommand(command, ...args)
+    global.application.sendCommandToAll(command, ...args)
   }
 }

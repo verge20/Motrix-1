@@ -11,7 +11,20 @@
         size="mini"
         :model="form"
         :rules="rules">
-        <el-form-item :label="`${$t('preferences.ui')}: `" :label-width="formLabelWidth">
+        <el-form-item :label="`${$t('preferences.appearance')}: `" :label-width="formLabelWidth">
+          <el-col class="form-item-sub" :span="24">
+            <mo-theme-switcher
+              v-model="form.theme"
+              @change="handleThemeChange"
+            />
+          </el-col>
+          <el-col v-if="showHideAppMenuOption" class="form-item-sub" :span="16">
+            <el-checkbox v-model="form.hideAppMenu">
+              {{ $t('preferences.hide-app-menu') }}
+            </el-checkbox>
+          </el-col>
+        </el-form-item>
+        <el-form-item :label="`${$t('preferences.language')}: `" :label-width="formLabelWidth">
           <el-col class="form-item-sub" :span="16">
             <el-select
               v-model="form.locale"
@@ -24,11 +37,6 @@
                 :value="item.value">
               </el-option>
             </el-select>
-          </el-col>
-          <el-col v-if="showHideAppMenuOption" class="form-item-sub" :span="16">
-            <el-checkbox v-model="form.hideAppMenu">
-              {{ $t('preferences.hide-app-menu') }}
-            </el-checkbox>
           </el-col>
         </el-form-item>
         <el-form-item :label="`${$t('preferences.proxy')}: `" :label-width="formLabelWidth">
@@ -47,6 +55,45 @@
               v-model="form.allProxyBackup">
             </el-input>
           </el-col>
+        </el-form-item>
+        <el-form-item :label="`${$t('preferences.bt-tracker')}: `" :label-width="formLabelWidth">
+          <div class="bt-tracker">
+            <el-input
+              type="textarea"
+              :autosize="{ minRows: 3, maxRows: 5 }"
+              auto-complete="off"
+              :placeholder="`${$t('preferences.bt-tracker-input-tips')}`"
+              v-model="form.btTracker">
+            </el-input>
+            <div class="sync-tracker">
+              <el-tooltip
+                class="item"
+                effect="dark"
+                :content="$t('preferences.sync-tracker-tips')"
+                placement="bottom"
+              >
+                <el-button
+                  @click="syncTrackerFromGitHub"
+                >
+                  <mo-icon
+                    name="refresh"
+                    width="12"
+                    height="12"
+                    :spin="true"
+                    v-if="isSyncTracker"
+                  />
+                  <mo-icon name="sync" width="12" height="12" v-else />
+                </el-button>
+              </el-tooltip>
+            </div>
+          </div>
+          <div class="el-form-item__info" style="margin-top: 8px;">
+            {{ $t('preferences.bt-tracker-tips') }}
+            <a target="_blank" href="https://github.com/ngosang/trackerslist" rel="noopener noreferrer">
+              https://github.com/ngosang/trackerslist
+              <mo-icon name="link" width="12" height="12" />
+            </a>
+          </div>
         </el-form-item>
         <el-form-item :label="`${$t('preferences.developer')}: `" :label-width="formLabelWidth">
           <el-col class="form-item-sub" :span="24">
@@ -102,26 +149,37 @@
 <script>
   import is from 'electron-is'
   import { mapState } from 'vuex'
+  import ThemeSwitcher from '@/components/Preference/ThemeSwitcher'
   import ShowInFolder from '@/components/Native/ShowInFolder'
   import userAgentMap from '@shared/ua'
   import { availableLanguages, getLanguage } from '@shared/locales'
   import { getLocaleManager } from '@/components/Locale'
+  import {
+    convertCommaToLine,
+    convertLineToComma
+  } from '@shared/utils'
+  import '@/components/Icons/sync'
+  import '@/components/Icons/refresh'
 
   const initialForm = (config) => {
     const {
-      locale,
-      hideAppMenu,
-      useProxy,
       allProxy,
       allProxyBackup,
+      btTracker,
+      hideAppMenu,
+      locale,
+      theme,
+      useProxy,
       userAgent
     } = config
     const result = {
-      locale,
-      hideAppMenu,
-      useProxy,
       allProxy,
       allProxyBackup,
+      btTracker: convertCommaToLine(btTracker),
+      hideAppMenu,
+      locale,
+      theme,
+      useProxy,
       userAgent
     }
     return result
@@ -130,12 +188,14 @@
   export default {
     name: 'mo-preference-advanced',
     components: {
+      [ThemeSwitcher.name]: ThemeSwitcher,
       [ShowInFolder.name]: ShowInFolder
     },
     data: function () {
       return {
         formLabelWidth: '23%',
         form: initialForm(this.$store.state.preference.config),
+        isSyncTracker: false,
         rules: {},
         color: '#c00',
         locales: availableLanguages
@@ -162,6 +222,21 @@
         const lng = getLanguage(locale)
         getLocaleManager().changeLanguage(lng)
         this.$electron.ipcRenderer.send('command', 'application:change-locale', lng)
+      },
+      handleThemeChange (theme) {
+        this.form.theme = theme
+        this.$electron.ipcRenderer.send('command', 'application:change-theme', theme)
+      },
+      syncTrackerFromGitHub () {
+        this.isSyncTracker = true
+        this.$store.dispatch('preference/fetchBtTracker')
+          .then((data) => {
+            console.log('syncTrackerFromGitHub data====>', data)
+            this.form.btTracker = data
+          })
+          .finally(() => {
+            this.isSyncTracker = false
+          })
       },
       onUseProxyChange (flag) {
         this.form.allProxy = flag ? this.form.allProxyBackup : ''
@@ -195,9 +270,13 @@
             console.log('error submit!!')
             return false
           }
+          const data = {
+            ...this.form,
+            btTracker: convertLineToComma(this.form.btTracker)
+          }
 
-          console.log('this.form===>', this.form)
-          this.$store.dispatch('preference/save', this.form)
+          console.log('this.form===>', data)
+          this.$store.dispatch('preference/save', data)
           if (this.isRenderer()) {
             this.$electron.ipcRenderer.send('command', 'application:relaunch')
           }
@@ -211,6 +290,14 @@
 </script>
 
 <style lang="scss">
+.bt-tracker {
+  position: relative;
+  .sync-tracker {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+  }
+}
 .ua-group {
   margin-top: 8px;
 }

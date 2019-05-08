@@ -6,6 +6,7 @@ import {
   getTaskFullPath,
   bytesToSize
 } from '@shared/utils'
+import { LIGHT_THEME, DARK_THEME } from '@shared/constants'
 
 const remote = is.renderer() ? require('electron').remote : {}
 
@@ -97,19 +98,37 @@ export function showDownloadSpeedInDock (downloadSpeed) {
   if (!is.macOS()) {
     return
   }
-  const text = downloadSpeed > 0 ? bytesToSize(downloadSpeed) : ''
+  const text = downloadSpeed > 0 ? `${bytesToSize(downloadSpeed)}/s` : ''
   updateDockBadge(text)
 }
 
 export function addToRecentTask (task) {
+  if (is.linux()) {
+    return
+  }
   const path = getTaskFullPath(task)
   remote.app.addRecentDocument(path)
 }
 
 export function addToRecentTaskByPath (path) {
+  if (is.linux()) {
+    return
+  }
   remote.app.addRecentDocument(path)
 }
 
 export function clearRecentTasks () {
+  if (is.linux()) {
+    return
+  }
   remote.app.clearRecentDocuments()
+}
+
+export function getSystemTheme () {
+  let result = LIGHT_THEME
+  if (!is.macOS()) {
+    return result
+  }
+  result = remote.systemPreferences.isDarkMode() ? DARK_THEME : LIGHT_THEME
+  return result
 }
